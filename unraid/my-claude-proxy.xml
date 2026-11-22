@@ -2,13 +2,13 @@
 <!-- Unraid template for the agent's proxy. Copy to
      /boot/config/plugins/dockerMan/templates-user/ and create with xmlToCommand.
      GitHub account: matthewjohnward.
-     Network: bridge (for internet) + claude-net (to serve the agent), via ExtraParams.
-     Docker 25+ accepts two network flags; if not, connect it in Phase 1b instead. -->
+     Networks: claude-out (ordinary custom bridge: its way out) + claude-net (internal,
+     serves the agent), BOTH in ExtraParams (Unraid ignores <Network> when ExtraParams has a network flag). Docker won't mix its built-in bridge with a custom network. -->
 <Container version="2">
   <Name>claude-proxy</Name>
   <Repository>ghcr.io/matthewjohnward/nas01-claude-proxy:latest</Repository>
   <Registry>https://github.com/matthewjohnward/nas01-claude-agent/pkgs/container/nas01-claude-proxy</Registry>
-  <Network>bridge</Network>
+  <Network>claude-out</Network>
   <MyIP/>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
@@ -19,7 +19,7 @@
   <WebUI/>
   <TemplateURL/>
   <Icon/>
-  <ExtraParams>--network=name=claude-net,ip=172.31.250.2 --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=256 --memory=256M --read-only --tmpfs /tmp:rw,size=32m</ExtraParams>
+  <ExtraParams>--network=claude-out --network=name=claude-net,ip=172.31.250.2 --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=256 --memory=256M --read-only --tmpfs /tmp:rw,size=32m</ExtraParams>
   <PostArgs/>
   <CPUset/>
   <DateInstalled/>
