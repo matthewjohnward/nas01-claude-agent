@@ -41,7 +41,9 @@ in case it's useful. No secrets live in this repo.
   can write to. The hard limits still hold if that were abused.
 
 ## Setup outline
-1. Create an internal network: `docker network create --internal --subnet 172.31.250.0/24 claude-net`
+1. Unraid: Settings → Docker → **Preserve user defined networks = Yes** (otherwise custom networks are deleted at every Docker start). Then create two networks:
+   - `docker network create --internal --subnet 172.31.250.0/24 --gateway 172.31.250.1 -o com.docker.network.bridge.inhibit_ipv4=true -o com.docker.network.bridge.name=br-claude claude-net` (no route out, and the host gets **no address** on it, so the agent can't reach host services such as Plex through the gateway)
+   - `docker network create --subnet 172.31.251.0/24 --gateway 172.31.251.1 -o com.docker.network.bridge.name=br-claude-out claude-out` (the proxy's way out; Docker won't mix its built-in `bridge` with a custom network)
 2. Put `proxy/squid.conf` + `proxy/allowlist-domains.txt` in the proxy's config folder; create the proxy from its template.
 3. Create `appdata/claude-agent/{config,workspace,secrets,policy}`; copy `policy/*` (owned by root, 644); write the API key file yourself (mode 400, owner 99:100).
 4. Create the agent from its template, then `docker exec -it claude-agent claude-setup`.
