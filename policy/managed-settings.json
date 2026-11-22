@@ -35,10 +35,6 @@
       {
         "matcher": "permission_prompt",
         "hooks": [{ "type": "command", "command": "/usr/local/bin/hook-notify approval", "timeout": 20 }]
-      },
-      {
-        "matcher": "idle_prompt",
-        "hooks": [{ "type": "command", "command": "/usr/local/bin/hook-notify waiting", "timeout": 20 }]
       }
     ]
   }
