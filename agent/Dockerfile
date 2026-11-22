@@ -30,10 +30,12 @@ RUN python3 -m venv /opt/unraid-mcp \
  && /opt/unraid-mcp/bin/pip uninstall -y pip
 
 # A named user for UID 99 (Debian has no user 99; group 100 "users" exists).
+# /app/logs: unraid-mcp writes its log there when it detects Docker; without a
+# writable folder it falls back to its own (read-only) install folder and crashes.
 RUN useradd --uid 99 --gid 100 --home-dir /config --no-create-home \
       --shell /bin/bash agent \
- && mkdir -p /config /workspace \
- && chown 99:100 /config /workspace
+ && mkdir -p /config /workspace /app/logs \
+ && chown 99:100 /config /workspace /app/logs
 
 COPY --chmod=0755 agent/bin/ /usr/local/bin/
 

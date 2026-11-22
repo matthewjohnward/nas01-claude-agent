@@ -35,8 +35,8 @@ in case it's useful. No secrets live in this repo.
   `no-new-privileges`, no Docker socket, no host shares; only its own appdata
   folder; an internal Docker network whose only exit is the allowlist proxy; a
   read-only Unraid API key; policy files mounted read-only.
-- **Soft limits** (inside Claude): Manual approval mode, Auto and Bypass
-  disabled, only managed rules/hooks/MCP servers, no claude.ai connectors.
+- **Soft limits** (inside Claude): sessions start in Manual (Auto only when
+  the user switches to it), Bypass disabled, only managed rules/hooks/MCP servers, no claude.ai connectors.
 - **Known gap:** Claude Code updates itself inside `/config`, which the agent
   can write to. The hard limits still hold if that were abused.
 
