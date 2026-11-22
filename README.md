@@ -46,9 +46,5 @@ in case it's useful. No secrets live in this repo.
 3. Create `appdata/claude-agent/{config,workspace,secrets,policy}`; copy `policy/*` (owned by root, 644); write the API key file yourself (mode 400, owner 99:100).
 4. Create the agent from its template, then `docker exec -it claude-agent claude-setup`.
 
-Note: images pushed to ghcr.io start out **private**, even from a public repo.
-After the first build, set each package to Public (package page → Package
-settings → Change visibility) so Unraid can pull without a token.
-
-## Licence
-MIT
+Images are published at `ghcr.io/matthewjohnward/nas01-claude-agent` and
+`ghcr.io/matthewjohnward/nas01-claude-proxy` (public, inherited from the repo).
