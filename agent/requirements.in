@@ -1,0 +1,10 @@
+# Source for requirements.txt. Regenerate (on a Mac with uv) after reviewing a
+# new unraid-mcp release; set --exclude-newer to a date at least two weeks back:
+#
+#   uv pip compile agent/requirements.in --exclude-newer 2026-11-08 \
+#     --generate-hashes --python-version 3.13 \
+#     --python-platform x86_64-unknown-linux-gnu --no-header \
+#     -o agent/requirements.txt
+#
+# unraid-mcp 2.10.3 was source-reviewed on 2026-11-22 (wheel sha256 9709f4fe...).
+unraid-mcp==2.10.3

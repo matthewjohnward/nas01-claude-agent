@@ -1,0 +1,24 @@
+# Domains the Claude agent may reach over HTTPS. One per line.
+# "example.com" = that name only; ".example.com" = it and all its subdomains.
+# After editing: docker exec claude-proxy squid -k reconfigure -f /etc/squid/nas01/squid.conf
+
+# --- Claude Code (needed). Source: code.claude.com/docs/en/network-config
+api.anthropic.com
+claude.ai
+claude.com
+platform.claude.com
+downloads.claude.ai
+
+# --- Remote Control: its own domains aren't documented. Add them here from the
+#     TCP_DENIED lines in `docker logs claude-proxy` during Phase 1c.
+
+# --- Read-only documentation (WebFetch). Add more only when a job needs one.
+code.claude.com
+docs.unraid.net
+forums.unraid.net
+raw.githubusercontent.com
+
+# --- Deliberately NOT allowed:
+#   mcp-proxy.anthropic.com  (claude.ai connectors; decision D5 = off)
+#   github.com, gist, pastebins, package indexes (upload routes = data could leave)
+#   telemetry hosts (switched off in the image)

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "unraid": {
+      "type": "stdio",
+      "command": "/usr/local/bin/unraid-mcp-launch",
+      "args": []
+    }
+  }
+}

@@ -1,0 +1,11 @@
+#!/bin/bash
+# Called by the managed Notification hooks. Sends a FIXED message only.
+# The hook's stdin payload is read and thrown away on purpose: it can contain
+# command text or file contents, which must not go to a phone notification.
+cat >/dev/null
+
+case "${1:-}" in
+  approval) notify daily "NAS01 agent" "Needs your approval. Open the Claude app." ;;
+  waiting)  notify daily "NAS01 agent" "Finished or waiting for you. Open the Claude app." ;;
+esac
+exit 0

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- Unraid template for the agent's proxy. Copy to
+     /boot/config/plugins/dockerMan/templates-user/ and create with xmlToCommand.
+     GitHub account: matthewjohnward.
+     Network: bridge (for internet) + claude-net (to serve the agent), via ExtraParams.
+     Docker 25+ accepts two network flags; if not, connect it in Phase 1b instead. -->
+<Container version="2">
+  <Name>claude-proxy</Name>
+  <Repository>ghcr.io/matthewjohnward/nas01-claude-proxy:latest</Repository>
+  <Registry>https://github.com/matthewjohnward/nas01-claude-agent/pkgs/container/nas01-claude-proxy</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/matthewjohnward/nas01-claude-agent</Support>
+  <Project>https://github.com/matthewjohnward/nas01-claude-agent</Project>
+  <Overview>Squid allowlist proxy: the Claude agent's only way out (listed HTTPS domains + two LAN IP:port pairs).</Overview>
+  <Category>Network:Proxy</Category>
+  <WebUI/>
+  <TemplateURL/>
+  <Icon/>
+  <ExtraParams>--network=name=claude-net,ip=172.31.250.2 --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=256 --memory=256M --read-only --tmpfs /tmp:rw,size=32m</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="Proxy config" Target="/etc/squid/nas01" Default="/mnt/cache/appdata/claude-proxy" Mode="ro" Description="squid.conf + allowlist-domains.txt (read-only)" Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/claude-proxy</Config>
+  <Config Name="TZ" Target="TZ" Default="Europe/London" Mode="" Description="" Type="Variable" Display="advanced" Required="false" Mask="false">Europe/London</Config>
+</Container>

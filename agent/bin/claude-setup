@@ -1,0 +1,23 @@
+#!/bin/bash
+# One-time setup, run by a person in the container console:
+#   docker exec -it claude-agent claude-setup
+# 1) sign in with a claude.ai subscription account (you type it in your browser)
+# 2) first Remote Control start, so you can answer its two questions once
+set -uo pipefail
+cd /workspace || exit 1
+
+echo "== Step 1 of 2: sign in to Claude (claude.ai subscription, not an API key)"
+echo "   Open the link it prints in your own browser. Never paste the code anywhere else."
+claude auth login || { echo "Sign-in failed; run claude-setup again."; exit 1; }
+
+# From here on, mark setup as done however step 2 ends (Ctrl+C included), so the
+# supervisor isn't left waiting forever.
+trap 'touch /config/.setup-done; echo; echo "Setup done. The supervisor will start Remote Control within a minute."' EXIT
+trap ':' INT
+
+echo
+echo "== Step 2 of 2: first Remote Control start"
+echo "   Answer 'y' to trust /workspace and 'y' to enable Remote Control."
+echo "   When it says 'Connected', press Ctrl+C. The supervisor then takes over."
+claude remote-control --name "${RC_NAME:-NAS01}" --permission-mode default \
+  --settings /etc/claude-code/session-settings.json --no-create-session-in-dir

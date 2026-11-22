@@ -1,0 +1,26 @@
+# Dependabot.
+# - docker + github-actions: weekly version PRs; auto-merged after build + scan pass.
+# - pip (agent/requirements.txt): SECURITY fixes only (version PRs are off with
+#   open-pull-requests-limit 0); never auto-merged; unraid-mcp upgrades are done
+#   by hand after a review.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directories: ["/agent", "/proxy"]
+    schedule:
+      interval: weekly
+    groups:
+      base-image:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directory: "/agent"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

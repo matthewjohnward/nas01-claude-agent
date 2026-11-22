@@ -1,0 +1,123 @@
+name: build
+
+# Builds both images, scans them for known vulnerabilities, and (on main only)
+# pushes them to GitHub Container Registry (ghcr.io).
+# - push to main / weekly / by hand: build -> scan -> push
+# - pull requests (incl. Dependabot): build -> scan only, nothing is pushed
+# The scan FAILS the run only for CRITICAL issues that already have a fix;
+# everything it finds is listed in the repo's Security tab.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"   # Mondays 03:17 UTC (fresh Debian security fixes)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build ${{ matrix.image }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write          # push to ghcr.io (main only)
+      id-token: write          # signed build provenance
+      attestations: write
+      security-events: write   # scan results -> Security tab
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: nas01-claude-agent
+            dockerfile: agent/Dockerfile
+          - image: nas01-claude-proxy
+            dockerfile: proxy/Dockerfile
+    env:
+      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    steps:
+      # All actions pinned to a full commit SHA (tag in the comment).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lower-case owner (ghcr.io needs it)
+        run: echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # 1) Build locally (fresh, no cache reuse) so it can be scanned before anything is published.
+      - name: Build for scanning
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          pull: true
+          no-cache: true
+          load: true
+          tags: scan/${{ matrix.image }}:candidate
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      # 2) Vulnerability scan (Grype): Debian packages + Python libraries.
+      - id: scan
+        name: Scan image
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: scan/${{ matrix.image }}:candidate
+          fail-build: true
+          severity-cutoff: critical
+          only-fixed: true
+          output-format: sarif
+
+      - name: Upload scan results to the Security tab
+        if: always() && steps.scan.outputs.sarif != ''
+        continue-on-error: true   # Dependabot PRs can't write security events
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: ${{ matrix.image }}
+
+      # 3) Publish (main only): same layers from the cache, plus SBOM + provenance.
+      - if: env.PUBLISH == 'true'
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: env.PUBLISH == 'true'
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ env.OWNER }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - if: env.PUBLISH == 'true'
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          cache-from: type=gha,scope=${{ matrix.image }}
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - if: env.PUBLISH == 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ghcr.io/${{ env.OWNER }}/${{ matrix.image }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

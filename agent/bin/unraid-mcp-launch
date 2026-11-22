@@ -1,0 +1,15 @@
+#!/bin/bash
+# Starts the unraid MCP server (stdio). The read-only API key is read from a
+# file on a read-only mount and only placed in this process's environment.
+set -euo pipefail
+keyfile="${UNRAID_KEY_FILE:-/secrets/unraid-api-key}"
+if [ ! -r "$keyfile" ]; then
+  echo "unraid-mcp-launch: key file $keyfile not found" >&2
+  exit 1
+fi
+UNRAID_API_KEY="$(tr -d '\r\n' < "$keyfile")"
+export UNRAID_API_KEY
+export UNRAID_API_URL="${UNRAID_API_URL:-http://192.168.1.1/graphql}"
+export UNRAID_MCP_TRANSPORT=stdio
+export UNRAID_MCP_LOG_LEVEL=INFO
+exec /opt/unraid-mcp/bin/unraid-mcp

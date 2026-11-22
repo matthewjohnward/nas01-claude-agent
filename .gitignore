@@ -1,0 +1,10 @@
+# Never commit secrets or local copies of real config.
+secrets/
+*.key
+*.pem
+.env
+.env.*
+*credentials*
+.claude/
+local/
+.DS_Store

@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "disableAutoMode": "disable",
+    "disableBypassPermissionsMode": "disable",
+    "allow": [
+      "mcp__unraid",
+      "Bash(notify *)"
+    ],
+    "deny": [
+      "Read(//secrets/**)",
+      "Read(//config/.claude/.credentials.json)",
+      "Edit(//config/.claude/**)",
+      "Edit(//config/.claude.json)",
+      "Edit(//etc/claude-code/**)"
+    ]
+  },
+  "disableAutoMode": "disable",
+  "useAutoModeDuringPlan": false,
+  "allowManagedPermissionRulesOnly": true,
+  "allowManagedHooksOnly": true,
+  "allowManagedMcpServersOnly": true,
+  "allowedMcpServers": [
+    { "serverCommand": ["/usr/local/bin/unraid-mcp-launch"] }
+  ],
+  "disableClaudeAiConnectors": true,
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [{ "type": "command", "command": "/usr/local/bin/hook-notify approval", "timeout": 20 }]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [{ "type": "command", "command": "/usr/local/bin/hook-notify waiting", "timeout": 20 }]
+      }
+    ]
+  }
+}
