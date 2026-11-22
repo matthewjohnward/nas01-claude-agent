@@ -5,7 +5,7 @@ These are mounted **read-only** at `/etc/claude-code/` in the agent container
 
 | File | What it does |
 |---|---|
-| `managed-settings.json` | Claude Code's highest-priority settings. Manual mode by default; Auto and Bypass switched off; only these allow/deny rules, hooks and MCP servers count (anything a session saves for itself is ignored); no claude.ai connectors; phone pings via fixed-text hooks. |
+| `managed-settings.json` | Claude Code's highest-priority settings. Sessions start in Manual; Auto is allowed when the user switches to it (in 2.1.330 the plan-approval button could switch to Auto even with `disableAutoMode`, so a lock there wasn't reliable anyway); Bypass switched off; plan files can be saved (`~/.claude/plans`) but settings, login, agents/commands/skills/hooks and the program can't be edited; session history kept 365 days; only these allow/deny rules, hooks and MCP servers count (anything a session saves for itself is ignored); no claude.ai connectors; phone pings via fixed-text hooks. |
 | `managed-mcp.json` | The only MCP server: `unraid` (read-only API key from `/secrets`). |
 | `session-settings.json` | Passed to `claude remote-control --settings`. Without it, Remote Control turns Auto mode on for new sessions. |
 
