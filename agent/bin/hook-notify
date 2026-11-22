@@ -5,7 +5,7 @@
 cat >/dev/null
 
 case "${1:-}" in
-  approval) notify daily "NAS01 agent" "Needs your approval. Open the Claude app." ;;
-  waiting)  notify daily "NAS01 agent" "Finished or waiting for you. Open the Claude app." ;;
+  approval) notify agent "NAS01 agent" "Needs your approval. Open the Claude app." ;;
+  waiting)  notify agent "NAS01 agent" "Finished or waiting for you. Open the Claude app." ;;
 esac
 exit 0

@@ -1,14 +1,15 @@
 #!/bin/bash
 # Send a phone notification through the Apprise API on the NAS.
-#   notify daily|media "Title" "Body"
-# Only the quiet buckets are allowed; "alerts" is refused on purpose.
+#   notify daily|media|agent "Title" "Body"
+# daily/media = quiet buckets; agent = the "NAS01 Agent" app (normal sound),
+# for "needs you" pings. "alerts" is refused on purpose.
 # (Apprise has no auth, so this is a convenience, not a security boundary.)
 set -uo pipefail
 
 tag="${1:-}"; title="${2:-NAS01 agent}"; body="${3:-}"
 case "$tag" in
-  daily|media) ;;
-  *) echo "notify: first argument must be 'daily' or 'media'" >&2; exit 2 ;;
+  daily|media|agent) ;;
+  *) echo "notify: first argument must be 'daily', 'media' or 'agent'" >&2; exit 2 ;;
 esac
 
 title="${title:0:100}"
